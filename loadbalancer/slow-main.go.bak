@@ -1,0 +1,86 @@
+package main
+
+import (
+	"fmt"
+	"math"
+	"math/rand"
+)
+
+const (
+	rounds  = 10_000
+	buckets = 100
+	balls   = 100_000_000
+)
+
+func main() {
+	var resultRF, resultBoT [rounds]int
+	for i := 0; i < rounds; i++ {
+		resultRF[i] = RandomFill()
+		resultBoT[i] = BestOfTwo()
+	}
+	fmt.Printf("Avg spread for RandomFill = %d\n", avg(resultRF))
+	fmt.Printf("Avg spread for BestOfTwo = %d\n", avg(resultBoT))
+}
+
+func avg(x [rounds]int) int {
+	total := 0
+	for i := 0; i < rounds; i++ {
+		total += x[i]
+	}
+	return total / rounds
+}
+
+func BestOfTwo() int {
+	var b [buckets]int
+	var b1, b2, max int
+	min := math.MaxInt
+	// fill buckets
+	for i := 0; i < balls; i++ {
+		for {
+			b1 = rand.Intn(buckets)
+			b2 = rand.Intn(buckets)
+			if b1 != b2 {
+				break
+			}
+		}
+
+		if b[b1] < b[b2] {
+			b[b1]++
+		} else {
+			b[b2]++
+		}
+	}
+
+	// check buckets
+	for i := 0; i < buckets; i++ {
+		if b[i] < min {
+			min = b[i]
+		}
+		if b[i] > max {
+			max = b[i]
+		}
+	}
+	return max - min
+}
+
+func RandomFill() int {
+	var b [buckets]int
+	max := 0
+	min := math.MaxInt
+
+	// fill buckets
+	for i := 0; i < balls; i++ {
+		b[rand.Intn(buckets)]++
+	}
+
+	// check buckets
+	for i := 0; i < buckets; i++ {
+		if b[i] < min {
+			min = b[i]
+		}
+		if b[i] > max {
+			max = b[i]
+		}
+	}
+	return max - min
+}
